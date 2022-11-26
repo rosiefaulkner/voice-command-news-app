@@ -1,5 +1,6 @@
 # Voice Controlled React News Application
-## Uses Alan AI Voice Interface
+
+Uses Alan AI Voice Interface, ReactJS, Axios and currently being extended to use Redux for data storage and state mapping
 
 ## Introduction
 This is a code repository for the corresponding video tutorial.

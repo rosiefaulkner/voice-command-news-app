@@ -1,36 +1,44 @@
-import React from "react";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import { Button, CardActionArea, CardActions } from "@mui/material";
+import React, { useState, useEffect, createRef } from 'react';
+import { Card, CardActions, CardActionArea, CardContent, CardMedia, Button, Typography } from '@material-ui/core';
 
-export const NewsCard = ({ article }) => {
+
+import useStyles from './styles';
+
+const NewsCard = ({ article: { description, publishedAt, source, title, url, urlToImage }, activeArticle, i }) => {
+  const classes = useStyles();
+  const [elRefs, setElRefs] = useState([]);
+  const scrollToRef = (ref) => window.scroll(0, ref.current.offsetTop - 50);
+
+  useEffect(() => {
+    window.scroll(0, 0);
+
+    setElRefs((refs) => Array(20).fill().map((_, j) => refs[j] || createRef()));
+  }, []);
+
+  useEffect(() => {
+    if (i === activeArticle && elRefs[activeArticle]) {
+      scrollToRef(elRefs[activeArticle]);
+    }
+  }, [i, activeArticle, elRefs]);
+
   return (
-    <Card sx={{ maxWidth: 345 }}>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          height="140"
-          image={article.urlToImage}
-          alt={article.title}
-        />
+    <Card key={i} ref={elRefs[i]} className={ activeArticle === i ? classes.activeCard : classes.card}>
+      <CardActionArea href={url} target="_blank">
+        <CardMedia className={classes.media} image={urlToImage || 'https://www.industry.gov.au/sites/default/files/August%202018/image/news-placeholder-738.png'} title={title} />
+        <div className={classes.details}>
+          <Typography variant="body2" color="textSecondary" component="h2">{(new Date(publishedAt)).toDateString()}</Typography>
+          <Typography variant="body2" color="textSecondary" component="h2">{source.name}</Typography>
+        </div>
+        <Typography className={classes.title} gutterBottom variant="h5" component="h2">{title}</Typography>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            {article.title}
-            {console.log(article.author)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {article.description}
-          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">{description}</Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions>
-        <Button size="small" color="primary">
-          Share
-        </Button>
-        <Button size="small">Learn More</Button>
+      <CardActions className={classes.cardActions}>
+        <Button size="small" color="primary" href={url}>Learn More</Button>
+        <Typography variant="h5" color="textSecondary" component="h2">{i + 1}</Typography>
       </CardActions>
     </Card>
   );
 };
+export default NewsCard;

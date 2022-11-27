@@ -15,3 +15,6 @@ In this app, I've built a Conversational Voice Controlled React News Application
 ## Setup:
 
 run `npm i && npm start` to start development server
+
+create account with [Alan AI](https://alan.app/) and use API key to supplement .env file
+create project within [Alan AI](https://alan.app/) and input code found in [news_reader_app.js](https://github.com/rosiefaulkner/voice-command-news-app/blob/master/src/news_reader_app.js)

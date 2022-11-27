@@ -81,7 +81,7 @@ intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|lates
     api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
         const { articles } = JSON.parse(body);
         
-        if(!articles) {
+        if(!articles.length) {
             p.play(`I can\'t find any news about ${p.C.value}. Look for a different category.`);
             return;
         }

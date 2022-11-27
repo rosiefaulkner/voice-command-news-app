@@ -33,6 +33,9 @@ intent('Give me the news from $(source* (.*))', (p) => {
         
         p.play({ command: 'newHeadlines', articles });
         p.play(`Here are the (latest|most recent) headlines from ${p.source.value}.`);
+        
+        p.play('Would you like me to read the headlines?');
+        p.then(confirmation);
     });
 })
 
@@ -57,6 +60,9 @@ intent('What\'s up with $(term* (.*))', (p) => {
         
         p.play({ command: 'newHeadlines', articles });
         p.play(`Here are the (latest|most recent) headlines about ${p.term.value}.`);
+        
+        p.play('Would you like me to read the headlines?');
+        p.then(confirmation);
     });
 })
 
@@ -75,7 +81,7 @@ intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|lates
     api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
         const { articles } = JSON.parse(body);
         
-        if(!articles) {
+        if(!articles.length) {
             p.play(`I can\'t find any news about ${p.C.value}. Look for a different category.`);
             return;
         }
@@ -83,17 +89,37 @@ intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|lates
         savedArticles = articles;
         
         p.play({ command: 'newHeadlines', articles });
-        
-        if(p.C.value) {
-            p.play(`Here are the (latest|recent) articles on ${p.C.value}.`);        
-        } else {
-            p.play(`Here are the (latest|recent) news`);   
-        }
 
-//         if(p.C.value) {
-//             p.play(`Here are the (latest|most recent) articles about ${p.C.value}.`);
-//         }else {
-//             p.play(`Here are the (latest|most recent) headlines`);
-        //}
+        if(p.C.value) {
+            p.play(`Here are the (latest|most recent) articles about ${p.C.value}.`);
+        }else {
+            p.play(`Here are the (latest|most recent) headlines`);
+        }
+        
+        p.play('Would you like me to read the headlines?');
+        p.then(confirmation);
     });
+})
+const confirmation = context(() => {
+    intent('yes', async (p) => {
+        for(let i = 0; i < savedArticles.length; i++){
+            p.play({ command: 'highlight', article: savedArticles[i]});
+            p.play(`${savedArticles[i].title}`);
+        }
+    })
+    
+    intent('no', (p) => {
+        p.play('Whatever. Easier for me.')
+    })
+})
+
+intent('open (the|) (article|) (number|) $(number* (.*))', (p) => {
+    if(p.number.value) {
+        p.play({ command:'open', number: p.number.value, articles: savedArticles})
+    }
+})
+
+intent('(go|) back', (p) => {
+    p.play('Hold on while we take a journey back in time!');
+    p.play({ command: 'newHeadlines', articles: []})
 })

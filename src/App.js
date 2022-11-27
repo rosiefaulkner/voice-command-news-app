@@ -27,6 +27,8 @@ const App = () => {
         } else if (command === 'instructions') {
           setIsOpen(true);
         } else if (command === 'highlight') {
+          // Recommended by React documentation: whenever you are changing the state based on the previous state, 
+          // you must use a callback function
           setActiveArticle((prevActiveArticle) => prevActiveArticle + 1);
         } else if (command === 'open') {
           const parsedNumber = number.length > 2 ? wordsToNumbers((number), { fuzzy: true }) : number;

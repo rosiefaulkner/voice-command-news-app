@@ -9,12 +9,15 @@ const NewsCard = ({ article: { description, publishedAt, source, title, url, url
   const [elRefs, setElRefs] = useState([]);
   const scrollToRef = (ref) => window.scroll(0, ref.current.offsetTop - 50);
 
+  // Only called when page renders
   useEffect(() => {
     window.scroll(0, 0);
 
+    // Weird solution for scrolling through articles with voice commands
     setElRefs((refs) => Array(20).fill().map((_, j) => refs[j] || createRef()));
   }, []);
 
+  // Enables scrolling as voice reads through headlines
   useEffect(() => {
     if (i === activeArticle && elRefs[activeArticle]) {
       scrollToRef(elRefs[activeArticle]);

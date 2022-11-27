@@ -120,6 +120,6 @@ intent('open (the|) (article|) (number|) $(number* (.*))', (p) => {
 })
 
 intent('(go|) back', (p) => {
-    p.play('Hold on while we take a journey back in time!');
+    p.play('Sure, going back');
     p.play({ command: 'newHeadlines', articles: []})
 })

@@ -62,20 +62,20 @@ intent('What\'s up with $(term* (.*))', (p) => {
 
 // News by Category
 const CATEGORIES = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
-const CATEGORIES_INTENT = `${CATEGORIES.map((category) => `${category}~${category}`).join('|')}`;
+const CATEGORIES_INTENT = `${CATEGORIES.map((category) => `${category}`).join('|')}`;
 
 intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|latest|) $(N news|headlines) (in|about|on|) $(C~ ${CATEGORIES_INTENT})`,
-  `(read|show|get|bring me|give me) (the|) (recent|latest) $(C~ ${CATEGORIES_INTENT}) $(N news|headlines)`, (p) => {
+  `(read|show|get|bring me|give me) (the|) (recent|latest) $(C* .+) $(N news|headlines)`, (p) => {
     let NEWS_API_URL = `https://newsapi.org/v2/top-headlines`;
     
     if(p.C.value) {
-        NEWS_API_URL = `${NEWS_API_URL}?category=${p.C.value}&apiKey=${API_KEY}&country=us`
+        NEWS_API_URL = `${NEWS_API_URL}?category=${p.C.value}&country=us&apikey=${API_KEY}`;
     }
     
     api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
         const { articles } = JSON.parse(body);
         
-        if(!articles.length) {
+        if(!articles) {
             p.play(`I can\'t find any news about ${p.C.value}. Look for a different category.`);
             return;
         }
@@ -83,6 +83,17 @@ intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|lates
         savedArticles = articles;
         
         p.play({ command: 'newHeadlines', articles });
-        p.play(`Here are the (latest|most recent) articles about ${p.C.value}.`);
+        
+        if(p.C.value) {
+            p.play(`Here are the (latest|recent) articles on ${p.C.value}.`);        
+        } else {
+            p.play(`Here are the (latest|recent) news`);   
+        }
+
+//         if(p.C.value) {
+//             p.play(`Here are the (latest|most recent) articles about ${p.C.value}.`);
+//         }else {
+//             p.play(`Here are the (latest|most recent) headlines`);
+        //}
     });
 })

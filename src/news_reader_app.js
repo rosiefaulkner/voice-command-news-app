@@ -1,125 +1,180 @@
-// Use this sample to create your own voice commands
-// intent('hello world', p => {
-//     p.play('(hello|hi there)');
-// });
-intent('What does this app do?', 'Whast can I do here?', 
-      reply('This is a news project'));
+// {Name: Translator}
+// {Description: Translate phrases from one language to another}
 
-// intent('Start a command', (p) => {
-//     p.play({command: 'testCommand'})
-// })
+const allLang = {
+    "Russian": "ru",
+    "German": "de",
+    "Spanish": "es",
+    "French": "fr",
+    "English": "en",
+    "Afrikaans": "af",
+    "Albanian": "sq",
+    "Arabic": "ar",
+    "Armenian": "hy",
+    "Bulgarian": "bg",
+    "Chinese": "zh",
+    "Croatian": "hr",
+    "Czech": "cs",
+    "Danish": "da",
+    "Dutch": "nl",
+    "Estonian": "et",
+    "Georgian": "ka",
+    "Greek": "el",
+    "Hebrew": "he",
+    "Hindi": "hi",
+    "Hungarian": "hu",
+    "Indonesian": "id",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Kashmiri": "ks",
+    "Korean": "ko",
+    "Malay": "ms",
+    "Mongolian": "mn",
+    "Nepali": "ne",
+    "Norwegian": "nb",
+    "Polish": "pl",
+    "Portuguese": "pt",
+    "Serbian": "sr",
+    "Sanskrit": "sa",
+    "Slovak": "sk",
+    "Slovenian": "sl",
+    "Turkish": "tr",
+    "Ukrainian": "uk",
+    "Vietnamese": "vi",
+    "Yiddish": "yi"
+}
 
-const API_KEY = '789d1b502a304499b839ceda86e04cee';
-let savedArticles = [];
+const languages = {
+    "russian": "ru",
+    "german": "de",
+    "spanish": "es",
+    "french": "fr",
+    "english": "en"
+}
 
-// News by Source
-intent('Give me the news from $(source* (.*))', (p) => {
-    let NEWS_API_URL = `https://newsapi.org/v2/top-headlines`;
-    
-    if(p.source.value) {
-        p.source.value = p.source.value.toLowerCase().split(" ").join("-");
-        NEWS_API_URL = `${NEWS_API_URL}?sources=${p.source.value}&apiKey=${API_KEY}`
-    }
-    
-    api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
-        const { articles } = JSON.parse(body);
-        
-        if(!articles.length) {
-            p.play(`Sorry, I\'m having trouble finding news from ${p.source.value}. Please try searching for news from somewhere else.`);
-            return;
-        }
-        
-        savedArticles = articles;
-        
-        p.play({ command: 'newHeadlines', articles });
-        p.play(`Here are the (latest|most recent) headlines from ${p.source.value}.`);
-        
-        p.play('Would you like me to read the headlines?');
-        p.then(confirmation);
-    });
-})
+const LANGS_INTENT = Object.keys(allLang).join('|');
 
-// News by Term
-intent('What\'s up with $(term* (.*))', (p) => {
-    let NEWS_API_URL = `https://newsapi.org/v2/everything`;
-    
-    if(p.term.value) {
-        p.term.value = p.term.value.toLowerCase().split(" ").join("-");
-        NEWS_API_URL = `${NEWS_API_URL}?q=${p.term.value}&apiKey=${API_KEY}`
-    }
-    
-    api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
-        const { articles } = JSON.parse(body);
-        
-        if(!articles.length) {
-            p.play(`I can\'t find any news about ${p.term.value}. Look for news about something else.`);
-            return;
-        }
-        
-        savedArticles = articles;
-        
-        p.play({ command: 'newHeadlines', articles });
-        p.play(`Here are the (latest|most recent) headlines about ${p.term.value}.`);
-        
-        p.play('Would you like me to read the headlines?');
-        p.then(confirmation);
-    });
-})
-
-// News by Category
-const CATEGORIES = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
-const CATEGORIES_INTENT = `${CATEGORIES.map((category) => `${category}`).join('|')}`;
-
-intent(`(show|what is|tell me|what's|what are|what're|read) (the|) (recent|latest|) $(N news|headlines) (in|about|on|) $(C~ ${CATEGORIES_INTENT})`,
-  `(read|show|get|bring me|give me) (the|) (recent|latest) $(C* .+) $(N news|headlines)`, (p) => {
-    let NEWS_API_URL = `https://newsapi.org/v2/top-headlines`;
-    
-    if(p.C.value) {
-        NEWS_API_URL = `${NEWS_API_URL}?category=${p.C.value}&country=us&apikey=${API_KEY}`;
-    }
-    
-    api.request(NEWS_API_URL, {headers: {"user-agent": 'user agent' }}, (error, response, body) => {
-        const { articles } = JSON.parse(body);
-        
-        if(!articles.length) {
-            p.play(`I can\'t find any news about ${p.C.value}. Look for a different category.`);
-            return;
-        }
-        
-        savedArticles = articles;
-        
-        p.play({ command: 'newHeadlines', articles });
-
-        if(p.C.value) {
-            p.play(`Here are the (latest|most recent) articles about ${p.C.value}.`);
-        }else {
-            p.play(`Here are the (latest|most recent) headlines`);
-        }
-        
-        p.play('Would you like me to read the headlines?');
-        p.then(confirmation);
-    });
-})
-const confirmation = context(() => {
-    intent('yes', async (p) => {
-        for(let i = 0; i < savedArticles.length; i++){
-            p.play({ command: 'highlight', article: savedArticles[i]});
-            p.play(`${savedArticles[i].title}`);
+const whatLanguage = context(() => {
+    follow(`(translate to|use|) $(L ${LANGS_INTENT})`, p => {
+        let lang = languages[p.L.toLowerCase()];
+        if (!lang) {
+            p.play(`I can not translate this to ${p.L}. Please choose another language`);
+        } else {
+            p.resolve(lang);
         }
     })
-    
-    intent('no', (p) => {
-        p.play('Whatever. Easier for me.')
+
+    follow(`(What|Which) languages (are available|can I use)`, p => {
+        p.play(`(You can translate|The available languages are) ${joinAnd(Object.keys(languages))}`);
     })
+
+
+    follow('(cancel|stop|break|exit) (translation|it|)', p => {
+        p.play("OK");
+        p.resolve(null);
+    })
+
+    fallback("Please, define the target language", "In which language?", "Specify the language for translation");
 })
 
-intent('open (the|) (article|) (number|) $(number* (.*))', (p) => {
-    if(p.number.value) {
-        p.play({ command:'open', number: p.number.value, articles: savedArticles})
+const whatPhrase = context(() => {
+    follow("$(P* .+)", p => p.resolve(p.P.value))
+})
+
+intent("Translate", async p => {
+    p.play("OK, what would you like me to translate?");
+    let text = await p.then(whatPhrase);
+    p.play("Ok, In which language?", "Ok, To what language?");
+    let lang = await p.then(whatLanguage);
+    translate(p, text, lang);
+})
+
+intent(`Can (you|I) translate to $(L ${LANGS_INTENT})`,
+    `(Can you|Do you) (understand|speak|translate to) $(L ${LANGS_INTENT})`, async p => {
+        let lang = languages[p.L.toLowerCase()];
+        if (lang) {
+            p.play("Yes, sure. What phrase do you want to translate?");
+            let text = await p.then(whatPhrase);
+            translate(p, text, lang);
+        } else {
+            p.play(`No, sorry, I can only translate ${joinAnd(Object.keys(languages))}`)
+        }
+    })
+
+intent(`Translate $(W* .+) (in|)to $(L ${LANGS_INTENT})`,
+    `(How|) (do you|would you|to|) say $(W* .+) (in|on) $(L ${LANGS_INTENT})`,
+    `What is $(W* .+) in $(L ${LANGS_INTENT})`, p => {
+        let lang = languages[p.L.toLowerCase()];
+        if (!lang) {
+            p.play(`I can't translate this to ${p.L}. Please choose another language`,
+                `Sorry, I can only translate ${joinAnd(Object.keys(languages))}`);
+        } else {
+            translate(p, p.W.value, lang);
+        }
+    })
+
+intent(`(How|) (do you|would you|to|) say $(W* .+)`, `translate $(W* .+)`, `$(W* .+)`,
+    `What is $(W* .+)`, async p => {
+        p.play("In which language?", "To what language?");
+        let lang = await p.then(whatLanguage);
+        translate(p, p.W.value, lang);
+    })
+
+intent(`(What|Which) languages (are available|can I use)`, p => {
+    p.play(`You can translate English to ${joinAnd(Object.keys(languages).map(capitalize))}`);
+})
+
+intent("Help (me|)", "What (to|can I) do (here|)", p => {
+    p.play(`I can translate ${joinAnd(Object.keys(languages))}. For example, you can ask me how to translate (Hello|Artificial Intelligence|Good day) to (${Object.keys(languages).join(`|`)})`);
+})
+
+function translate(p, text, lang) {
+    if (!lang) {
+        return;
     }
-})
+    if (lang === 'en') {
+        p.play({command: 'showTranslation', srcLang: 'English', dstLang: 'English',
+            srcText: text, dstText: text, embeddedPage: true, page: "translation.html"});
+        p.play(text);
+        return;
+    }
 
-intent('(go|) back', (p) => {
-    p.play('Sure, going back');
-    p.play({ command: 'newHeadlines', articles: []})
-})
+    apiCall(p, 'translate', {text: text, srcLang: 'en', dstLang: lang}, response => {
+        if (!response.error) {
+            p.play({command: 'showTranslation', srcLang: 'English', dstLang: (_.invert(allLang))[lang],
+                srcText: text, dstText: response.translated, embeddedPage: true, page: "translation.html"});
+            p.play(voice(lang), response.translated);
+        } else {
+            console.log(response.error);
+        }
+    });
+}
+
+function apiCall(p, command, param, callback) {
+    let jsp = {
+        url: "https://studio.alan.app/api_playground/" + command,
+        strictSSL: false,
+        method: 'POST',
+        json: param,
+        timeout: 3000,
+    };
+    api.request(jsp, (err, res, body) => {
+        if (err || res.statusCode !== 200) {
+            p.play('(Sorry|) something went wrong (with the server|)');
+        } else if (body.error) {
+            p.play(body.error);
+        } else {
+            callback(body);
+        }
+    });
+}
+
+function capitalize(str) {
+    return str[0].toUpperCase() + str.slice(1);
+}
+
+function joinAnd(list) {
+    let head = list.slice(0, -1);
+    return _.isEmpty(head) ? list[0] : head.join(", ") + ", and " + list.slice(-1);
+}
+

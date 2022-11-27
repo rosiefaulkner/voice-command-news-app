@@ -2,9 +2,9 @@
 // intent('hello world', p => {
 //     p.play('(hello|hi there)');
 // });
-intent('What does this app do?', 'Whast can I do here?', 
-      reply('This is a news project'));
-
+intent(`What does this app do?`, `How does this work?`, `What can I do here?`, `How should I use this?`,
+    reply(`This is a news project, and you can provide the most recent headlines in mainstream media` +
+        ` Just ask me anything about the news, and I will try to answer it`));
 // intent('Start a command', (p) => {
 //     p.play({command: 'testCommand'})
 // })

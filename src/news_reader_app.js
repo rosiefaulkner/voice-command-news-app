@@ -1,7 +1,3 @@
-// Use this sample to create your own voice commands
-// intent('hello world', p => {
-//     p.play('(hello|hi there)');
-// });
 intent(
   `What does this app do?`,
   `How does this work?`,
@@ -12,11 +8,8 @@ intent(
       ` Just ask me anything about the news, and I will try to answer it`
   )
 );
-// intent('Start a command', (p) => {
-//     p.play({command: 'testCommand'})
-// })
 
-const API_KEY = "789d1b502a304499b839ceda86e04cee";
+const API_KEY = process.env.REACT_APP_ALAN_KEY;
 let savedArticles = [];
 
 // News by Source
